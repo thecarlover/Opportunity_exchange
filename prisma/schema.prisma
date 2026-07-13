@@ -1,0 +1,84 @@
+// Solvd.io — Prisma Schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  BUSINESS
+  SOLUTION_PROVIDER
+  ADMIN
+}
+
+enum ProblemStatus {
+  OPEN
+  CLOSED
+  COMPLETED
+}
+
+enum ProposalStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role
+  bio          String?
+  createdAt    DateTime  @default(now())
+
+  problems  Problem[]
+  proposals Proposal[]
+  ratings   Rating[]
+}
+
+model Problem {
+  id          String        @id @default(cuid())
+  businessId  String
+  title       String
+  description String
+  category    String
+  budget      String
+  timeline    String
+  status      ProblemStatus @default(OPEN)
+  createdAt   DateTime      @default(now())
+
+  business  User       @relation(fields: [businessId], references: [id])
+  proposals Proposal[]
+  rating    Rating?
+}
+
+model Proposal {
+  id         String         @id @default(cuid())
+  problemId  String
+  providerId String
+  message    String
+  price      String
+  timeline   String
+  status     ProposalStatus @default(PENDING)
+  createdAt  DateTime       @default(now())
+
+  problem  Problem @relation(fields: [problemId], references: [id])
+  provider User    @relation(fields: [providerId], references: [id])
+}
+
+model Rating {
+  id         String   @id @default(cuid())
+  problemId  String   @unique
+  providerId String
+  stars      Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  problem  Problem @relation(fields: [problemId], references: [id])
+  provider User    @relation(fields: [providerId], references: [id])
+}

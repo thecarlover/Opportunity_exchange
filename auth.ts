@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import type { Role } from "@/lib/generated/prisma/enums";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",

@@ -32,15 +32,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name,
           email: user.email,
           role: user.role,
+          image: user.image,
         };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = (user as { role: Role }).role;
+        token.image = (user as any).image;
+      }
+      
+      if (trigger === "update" && session) {
+        // If the user updates their profile, merge new data into token
+        if (session.user?.image !== undefined) {
+          token.image = session.user.image;
+        }
       }
       return token;
     },
@@ -48,6 +57,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as Role;
+        if (token.image) {
+          session.user.image = token.image as string;
+        }
       }
       return session;
     },

@@ -53,14 +53,26 @@ export default function Navbar() {
                   </Button>
                 </Link>
               )}
-              <div className="ml-3 flex items-center gap-2">
+              <div className="ml-3 flex items-center gap-3 border-l border-border pl-4">
                 {session.user.role === "ADMIN" && (
                   <Badge variant="default" className="hidden sm:flex">Admin</Badge>
                 )}
+                <Link href="/settings" className="flex items-center gap-2 group">
+                  <div className="h-8 w-8 rounded-full bg-muted border overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105">
+                    {session.user.image ? (
+                      <img src={session.user.image} alt="Avatar" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {session.user.name?.charAt(0).toUpperCase() || "U"}
+                      </span>
+                    )}
+                  </div>
+                </Link>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => signOut({ callbackUrl: "/" })}
+                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 >
                   Sign out
                 </Button>

@@ -33,6 +33,7 @@ model User {
   passwordHash     String
   role             Role      @default(USER)
   bio              String?
+  image            String?
   skills           String[]
   reputationScores Json?
   createdAt        DateTime  @default(now())

@@ -122,8 +122,8 @@ function ProviderDashboard({ applications }: { applications: Application[] }) {
         <div className="text-4xl mb-4">💡</div>
         <h3 className="text-lg font-semibold text-foreground">No applications yet</h3>
         <p className="text-muted-foreground mt-1 mb-6">Browse open opportunities and submit your first application.</p>
-        <Link href="/opportunities">
-          <Button>Browse Opportunities →</Button>
+        <Link href="/feed">
+          <Button>Mission Feed →</Button>
         </Link>
       </div>
     );
@@ -237,8 +237,8 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/opportunities">
-            <Button variant="outline">Browse Opportunities</Button>
+          <Link href="/feed">
+            <Button variant="outline">Mission Feed</Button>
           </Link>
           <Link href="/opportunities/new">
             <Button className="shadow-sm">+ Post a Opportunity</Button>
@@ -293,8 +293,8 @@ export default function DashboardPage() {
             <Link href="/opportunities/new">
               <Button>Post a Opportunity</Button>
             </Link>
-            <Link href="/opportunities">
-              <Button variant="outline">Browse Opportunities</Button>
+            <Link href="/feed">
+              <Button variant="outline">Mission Feed</Button>
             </Link>
           </div>
         </div>

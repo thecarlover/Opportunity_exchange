@@ -196,8 +196,8 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
         <div className="text-4xl mb-4">😕</div>
         <h2 className="text-xl font-semibold">Opportunity not found</h2>
-        <Link href="/opportunities" className="mt-4">
-          <Button variant="outline">Browse Opportunities</Button>
+        <Link href="/feed" className="mt-4">
+          <Button variant="outline">Mission Feed</Button>
         </Link>
       </div>
     );
@@ -227,8 +227,8 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-10">
-      <Link href="/opportunities" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-        ← Back to opportunities
+      <Link href="/feed" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+        ← Back to feed
       </Link>
 
       {/* Opportunity Header */}

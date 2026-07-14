@@ -74,8 +74,8 @@ export default function NewProblemPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10">
       <div className="mb-8">
-        <Link href="/opportunities" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-          ← Back to opportunities
+        <Link href="/feed" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+          ← Back to feed
         </Link>
         <h1 className="text-3xl font-bold text-foreground mt-3">Post a New Opportunity</h1>
         <p className="text-muted-foreground mt-1">

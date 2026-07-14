@@ -10,8 +10,7 @@ datasource db {
 }
 
 enum Role {
-  BUSINESS
-  SOLUTION_PROVIDER
+  USER
   ADMIN
 }
 

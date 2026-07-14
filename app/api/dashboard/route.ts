@@ -8,8 +8,8 @@ export async function GET() {
   }
 
   try {
-    if (session.user.role === "BUSINESS") {
-      const problems = await prisma.problem.findMany({
+    const [problems, proposals] = await Promise.all([
+      prisma.problem.findMany({
         where: { businessId: session.user.id },
         include: {
           _count: { select: { proposals: true } },
@@ -22,10 +22,8 @@ export async function GET() {
           rating: true,
         },
         orderBy: { createdAt: "desc" },
-      });
-      return Response.json({ role: "BUSINESS", problems });
-    } else {
-      const proposals = await prisma.proposal.findMany({
+      }),
+      prisma.proposal.findMany({
         where: { providerId: session.user.id },
         include: {
           problem: {
@@ -35,9 +33,10 @@ export async function GET() {
           },
         },
         orderBy: { createdAt: "desc" },
-      });
-      return Response.json({ role: "SOLUTION_PROVIDER", proposals });
-    }
+      })
+    ]);
+
+    return Response.json({ role: session.user.role, problems, proposals });
   } catch (err) {
     console.error(err);
     return Response.json({ error: "Internal server error" }, { status: 500 });

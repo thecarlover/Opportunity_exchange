@@ -215,7 +215,6 @@ export default function DashboardPage() {
     );
   }
 
-  const isBusiness = session.user.role === "BUSINESS";
   const isAdmin = session.user.role === "ADMIN";
 
   if (isAdmin) {
@@ -230,46 +229,38 @@ export default function DashboardPage() {
       <div className="mb-8 flex items-start justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            {isBusiness ? "My Problems" : "My Proposals"}
+            My Dashboard
           </h1>
           <p className="text-muted-foreground mt-1">
             Welcome back, <strong>{session.user.name}</strong>!
-            {isBusiness
-              ? " Manage your posted problems and accepted proposals."
-              : " Track your submitted proposals and their status."}
+            Manage your posted problems and track your submitted proposals.
           </p>
         </div>
-        {isBusiness && (
+        <div className="flex gap-3">
+          <Link href="/problems">
+            <Button variant="outline">Browse Problems</Button>
+          </Link>
           <Link href="/problems/new">
             <Button className="shadow-sm">+ Post a Problem</Button>
           </Link>
-        )}
-        {!isBusiness && (
-          <Link href="/problems">
-            <Button variant="outline">Browse Problems →</Button>
-          </Link>
-        )}
+        </div>
       </div>
 
       {/* Stats row */}
       {data && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-          {isBusiness && data.problems && [
+          {data.problems && [
             { label: "Total Problems", value: data.problems.length },
             { label: "Open", value: data.problems.filter((p) => p.status === "OPEN").length },
-            { label: "Closed", value: data.problems.filter((p) => p.status === "CLOSED").length },
-            { label: "Completed", value: data.problems.filter((p) => p.status === "COMPLETED").length },
           ].map((stat) => (
             <div key={stat.label} className="rounded-xl border border-border bg-card p-4 text-center">
               <div className="text-2xl font-bold text-primary">{stat.value}</div>
               <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
             </div>
           ))}
-          {!isBusiness && data.proposals && [
+          {data.proposals && [
             { label: "Total Proposals", value: data.proposals.length },
-            { label: "Pending", value: data.proposals.filter((p) => p.status === "PENDING").length },
             { label: "Accepted", value: data.proposals.filter((p) => p.status === "ACCEPTED").length },
-            { label: "Rejected", value: data.proposals.filter((p) => p.status === "REJECTED").length },
           ].map((stat) => (
             <div key={stat.label} className="rounded-xl border border-border bg-card p-4 text-center">
               <div className="text-2xl font-bold text-primary">{stat.value}</div>
@@ -279,11 +270,34 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {data?.role === "BUSINESS" && data.problems && (
-        <BusinessDashboard problems={data.problems} />
+      {data?.problems && data.problems.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-xl font-bold mb-4">Problems I Posted</h2>
+          <BusinessDashboard problems={data.problems} />
+        </div>
       )}
-      {data?.role === "SOLUTION_PROVIDER" && data.proposals && (
-        <ProviderDashboard proposals={data.proposals} />
+      
+      {data?.proposals && data.proposals.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-xl font-bold mb-4">My Submitted Proposals</h2>
+          <ProviderDashboard proposals={data.proposals} />
+        </div>
+      )}
+      
+      {data?.problems?.length === 0 && data?.proposals?.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-border bg-card">
+          <div className="text-4xl mb-4">👋</div>
+          <h3 className="text-lg font-semibold text-foreground">Welcome to Solvd.io!</h3>
+          <p className="text-muted-foreground mt-1 mb-6 max-w-md mx-auto">You haven't posted any problems or submitted any proposals yet. Choose what you'd like to do first.</p>
+          <div className="flex gap-4">
+            <Link href="/problems/new">
+              <Button>Post a Problem</Button>
+            </Link>
+            <Link href="/problems">
+              <Button variant="outline">Browse Problems</Button>
+            </Link>
+          </div>
+        </div>
       )}
     </div>
   );

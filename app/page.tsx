@@ -42,12 +42,10 @@ const FEATURES = [
 ];
 
 export default async function HomePage() {
-  const [totalProblems, totalProviders, totalBusinesses] = await Promise.all([
+  const [totalProblems, totalUsers] = await Promise.all([
     prisma.problem.count(),
-    prisma.user.count({ where: { role: "SOLUTION_PROVIDER" } }),
-    prisma.user.count({ where: { role: "BUSINESS" } })
+    prisma.user.count({ where: { role: "USER" } })
   ]);
-  const totalUsers = totalProviders + totalBusinesses;
 
   return (
     <div className="flex flex-col">

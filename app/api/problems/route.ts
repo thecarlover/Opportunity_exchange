@@ -33,9 +33,6 @@ export async function POST(req: NextRequest) {
   if (!session?.user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (session.user.role !== "BUSINESS") {
-    return Response.json({ error: "Only businesses can post problems" }, { status: 403 });
-  }
 
   try {
     const body = await req.json();

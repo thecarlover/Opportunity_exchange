@@ -45,16 +45,7 @@ export default function NewProblemPage() {
     );
   }
 
-  if (session.user.role !== "BUSINESS") {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-        <div className="text-4xl mb-4">🚫</div>
-        <h2 className="text-xl font-semibold">Businesses only</h2>
-        <p className="text-muted-foreground mt-2 mb-6">Only business accounts can post problems.</p>
-        <Link href="/problems"><Button variant="outline">Browse Problems</Button></Link>
-      </div>
-    );
-  }
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

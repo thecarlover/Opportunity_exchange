@@ -80,8 +80,8 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
       if (!res.ok) throw new Error("Not found");
       const data: Problem = await res.json();
       setProblem(data);
-      // Check if current provider already submitted
-      if (session?.user?.role === "SOLUTION_PROVIDER") {
+      // Check if current user already submitted a proposal
+      if (session?.user && session.user.id !== data.businessId) {
         const hasProposal = data.proposals.some((p) => p.providerId === session.user.id);
         setAlreadyProposed(hasProposal);
       }
@@ -204,7 +204,7 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
   }
 
   const isOwner = session?.user?.id === problem.businessId;
-  const isProvider = session?.user?.role === "SOLUTION_PROVIDER";
+  const isProvider = session?.user && !isOwner;
   const acceptedProposal = problem.proposals.find((p) => p.status === "ACCEPTED");
   const myProposal = problem.proposals.find((p) => p.providerId === session?.user?.id);
 

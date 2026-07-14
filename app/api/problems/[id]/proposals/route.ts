@@ -26,7 +26,7 @@ export async function GET(
     }
 
     const where =
-      session.user.role === "BUSINESS" && session.user.id === problem.businessId
+      session.user.id === problem.businessId
         ? { problemId: id }
         : { problemId: id, providerId: session.user.id };
 
@@ -54,17 +54,13 @@ export async function POST(
   if (!session?.user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (session.user.role !== "SOLUTION_PROVIDER") {
-    return Response.json(
-      { error: "Only solution providers can submit proposals" },
-      { status: 403 }
-    );
-  }
-
   try {
     const problem = await prisma.problem.findUnique({ where: { id } });
     if (!problem || problem.status !== "OPEN") {
       return Response.json({ error: "Problem not open" }, { status: 400 });
+    }
+    if (problem.businessId === session.user.id) {
+      return Response.json({ error: "You cannot submit a proposal for your own problem" }, { status: 400 });
     }
 
     const existing = await prisma.proposal.findFirst({

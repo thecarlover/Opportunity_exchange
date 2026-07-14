@@ -46,7 +46,7 @@ export default function Navbar() {
               >
                 {session.user.role === "ADMIN" ? "Admin Panel" : "Dashboard"}
               </Link>
-              {session.user.role === "BUSINESS" && (
+              {session.user.role !== "ADMIN" && (
                 <Link href="/problems/new">
                   <Button size="sm" className="ml-2">
                     Post a Problem
@@ -54,9 +54,9 @@ export default function Navbar() {
                 </Link>
               )}
               <div className="ml-3 flex items-center gap-2">
-                <Badge variant={session.user.role === "ADMIN" ? "default" : "secondary"} className="hidden sm:flex">
-                  {session.user.role === "BUSINESS" ? "Business" : session.user.role === "ADMIN" ? "Admin" : "Provider"}
-                </Badge>
+                {session.user.role === "ADMIN" && (
+                  <Badge variant="default" className="hidden sm:flex">Admin</Badge>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"

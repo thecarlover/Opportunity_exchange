@@ -13,7 +13,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 export default function SignupPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<"BUSINESS" | "SOLUTION_PROVIDER">("BUSINESS");
   const [form, setForm] = useState({ name: "", email: "", password: "", bio: "" });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -23,7 +22,7 @@ export default function SignupPage() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, role }),
+        body: JSON.stringify(form),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -57,30 +56,7 @@ export default function SignupPage() {
               <CardDescription>Fill in your information to get started.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
-              {/* Role selection */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">I am a...</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { value: "BUSINESS", label: "🏢 Business", desc: "I post problems" },
-                    { value: "SOLUTION_PROVIDER", label: "⚡ Solution Provider", desc: "I submit proposals" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setRole(opt.value as "BUSINESS" | "SOLUTION_PROVIDER")}
-                      className={`rounded-xl border-2 p-3 text-left transition-all duration-200 ${
-                        role === opt.value
-                          ? "border-primary bg-primary/8 text-primary"
-                          : "border-border hover:border-primary/40 hover:bg-muted/50"
-                      }`}
-                    >
-                      <div className="font-semibold text-sm">{opt.label}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{opt.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+
 
               <div className="space-y-2">
                 <Label htmlFor="signup-name">Full Name</Label>

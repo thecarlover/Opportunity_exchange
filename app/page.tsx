@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { prisma } from "@/lib/prisma";
 
 const CATEGORIES = [
   "Technology",
@@ -40,7 +41,14 @@ const FEATURES = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [totalProblems, totalProviders, totalBusinesses] = await Promise.all([
+    prisma.problem.count(),
+    prisma.user.count({ where: { role: "SOLUTION_PROVIDER" } }),
+    prisma.user.count({ where: { role: "BUSINESS" } })
+  ]);
+  const totalUsers = totalProviders + totalBusinesses;
+
   return (
     <div className="flex flex-col">
       {/* Hero */}
@@ -82,10 +90,13 @@ export default function HomePage() {
       {/* Stats strip */}
       <section className="border-y border-border bg-white py-8">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center mb-6">
+            <h3 className="text-lg font-semibold text-muted-foreground">Live Marketplace Activity</h3>
+          </div>
           <div className="grid grid-cols-3 gap-8 text-center">
             {[
-              { value: "500+", label: "Active Problems" },
-              { value: "1,200+", label: "Solution Providers" },
+              { value: totalProblems.toLocaleString(), label: "Problems Posted" },
+              { value: totalUsers.toLocaleString(), label: "Users Signed Up" },
               { value: "98%", label: "Satisfaction Rate" },
             ].map((stat) => (
               <div key={stat.label}>

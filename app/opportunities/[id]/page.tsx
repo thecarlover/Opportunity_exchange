@@ -13,18 +13,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 
 type Provider = { id: string; name: string; bio?: string; email?: string };
-type Proposal = {
+type Application = {
   id: string;
-  providerId: string;
+  applicantId: string;
   message: string;
   price: string;
   timeline: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   createdAt: string;
-  provider: Provider;
+  applicant: Provider;
 };
 type Rating = { stars: number; comment?: string };
-type Problem = {
+type Opportunity = {
   id: string;
   title: string;
   description: string;
@@ -33,9 +33,9 @@ type Problem = {
   timeline: string;
   status: "OPEN" | "CLOSED" | "COMPLETED";
   createdAt: string;
-  businessId: string;
-  business: { id: string; name: string; email?: string };
-  proposals: Proposal[];
+  posterId: string;
+  poster: { id: string; name: string; email?: string };
+  applications: Application[];
   rating: Rating | null;
 };
 
@@ -61,10 +61,10 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
 export default function ProblemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { data: session } = useSession();
-  const [problem, setProblem] = useState<Problem | null>(null);
+  const [opportunity, setProblem] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Proposal form state
+  // Application form state
   const [proposalForm, setProposalForm] = useState({ message: "", price: "", timeline: "" });
   const [submittingProposal, setSubmittingProposal] = useState(false);
   const [alreadyProposed, setAlreadyProposed] = useState(false);
@@ -76,17 +76,17 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
 
   async function fetchProblem() {
     try {
-      const res = await fetch(`/api/problems/${id}`);
+      const res = await fetch(`/api/opportunities/${id}`);
       if (!res.ok) throw new Error("Not found");
-      const data: Problem = await res.json();
+      const data: Opportunity = await res.json();
       setProblem(data);
-      // Check if current user already submitted a proposal
-      if (session?.user && session.user.id !== data.businessId) {
-        const hasProposal = data.proposals.some((p) => p.providerId === session.user.id);
+      // Check if current user already submitted a application
+      if (session?.user && session.user.id !== data.posterId) {
+        const hasProposal = data.applications.some((p) => p.applicantId === session.user.id);
         setAlreadyProposed(hasProposal);
       }
     } catch {
-      toast.error("Could not load problem");
+      toast.error("Could not load opportunity");
     } finally {
       setLoading(false);
     }
@@ -101,17 +101,17 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
     e.preventDefault();
     setSubmittingProposal(true);
     try {
-      const res = await fetch(`/api/problems/${id}/proposals`, {
+      const res = await fetch(`/api/opportunities/${id}/applications`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(proposalForm),
       });
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.error || "Failed to submit proposal");
+        toast.error(data.error || "Failed to submit application");
         return;
       }
-      toast.success("Proposal submitted!");
+      toast.success("Application submitted!");
       setProposalForm({ message: "", price: "", timeline: "" });
       setAlreadyProposed(true);
       fetchProblem();
@@ -122,17 +122,17 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  async function acceptProposal(proposalId: string) {
+  async function acceptProposal(applicationId: string) {
     try {
-      const res = await fetch(`/api/problems/${id}/proposals/${proposalId}/accept`, {
+      const res = await fetch(`/api/opportunities/${id}/applications/${applicationId}/accept`, {
         method: "PATCH",
       });
       if (!res.ok) {
         const data = await res.json();
-        toast.error(data.error || "Failed to accept proposal");
+        toast.error(data.error || "Failed to accept application");
         return;
       }
-      toast.success("Proposal accepted! Contact emails revealed.");
+      toast.success("Application accepted! Contact emails revealed.");
       fetchProblem();
     } catch {
       toast.error("Something went wrong");
@@ -142,13 +142,13 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
   async function markComplete() {
     setMarkingComplete(true);
     try {
-      const res = await fetch(`/api/problems/${id}/complete`, { method: "PATCH" });
+      const res = await fetch(`/api/opportunities/${id}/complete`, { method: "PATCH" });
       if (!res.ok) {
         const data = await res.json();
         toast.error(data.error || "Failed to mark complete");
         return;
       }
-      toast.success("Problem marked as complete!");
+      toast.success("Opportunity marked as complete!");
       fetchProblem();
     } catch {
       toast.error("Something went wrong");
@@ -162,7 +162,7 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
     if (ratingForm.stars === 0) { toast.error("Please select a star rating"); return; }
     setSubmittingRating(true);
     try {
-      const res = await fetch(`/api/problems/${id}/rating`, {
+      const res = await fetch(`/api/opportunities/${id}/rating`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ratingForm),
@@ -191,22 +191,22 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  if (!problem) {
+  if (!opportunity) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
         <div className="text-4xl mb-4">😕</div>
-        <h2 className="text-xl font-semibold">Problem not found</h2>
-        <Link href="/problems" className="mt-4">
-          <Button variant="outline">Browse Problems</Button>
+        <h2 className="text-xl font-semibold">Opportunity not found</h2>
+        <Link href="/opportunities" className="mt-4">
+          <Button variant="outline">Browse Opportunities</Button>
         </Link>
       </div>
     );
   }
 
-  const isOwner = session?.user?.id === problem.businessId;
+  const isOwner = session?.user?.id === opportunity.posterId;
   const isProvider = session?.user && !isOwner;
-  const acceptedProposal = problem.proposals.find((p) => p.status === "ACCEPTED");
-  const myProposal = problem.proposals.find((p) => p.providerId === session?.user?.id);
+  const acceptedProposal = opportunity.applications.find((p) => p.status === "ACCEPTED");
+  const myProposal = opportunity.applications.find((p) => p.applicantId === session?.user?.id);
 
   const statusColor: Record<string, string> = {
     OPEN: "bg-green-100 text-green-700 border-green-200",
@@ -220,36 +220,36 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
     REJECTED: "bg-red-100 text-red-700",
   };
 
-  // Proposals visible: owner sees all, provider sees only their own
+  // Applications visible: owner sees all, applicant sees only their own
   const visibleProposals = isOwner
-    ? problem.proposals
-    : problem.proposals.filter((p) => p.providerId === session?.user?.id);
+    ? opportunity.applications
+    : opportunity.applications.filter((p) => p.applicantId === session?.user?.id);
 
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-10">
-      <Link href="/problems" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-        ← Back to problems
+      <Link href="/opportunities" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+        ← Back to opportunities
       </Link>
 
-      {/* Problem Header */}
+      {/* Opportunity Header */}
       <div className="mt-4 mb-6">
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <Badge variant="outline" className="text-primary border-primary/30 bg-primary/5">
-            {problem.category}
+            {opportunity.category}
           </Badge>
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusColor[problem.status]}`}>
-            {problem.status.charAt(0) + problem.status.slice(1).toLowerCase()}
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusColor[opportunity.status]}`}>
+            {opportunity.status.charAt(0) + opportunity.status.slice(1).toLowerCase()}
           </span>
         </div>
-        <h1 className="text-3xl font-bold text-foreground leading-tight">{problem.title}</h1>
+        <h1 className="text-3xl font-bold text-foreground leading-tight">{opportunity.title}</h1>
         <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
-          <span>Posted by <strong>{problem.business.name}</strong></span>
+          <span>Posted by <strong>{opportunity.poster.name}</strong></span>
           <span>·</span>
-          <span>Budget: <strong>{problem.budget}</strong></span>
+          <span>Budget: <strong>{opportunity.budget}</strong></span>
           <span>·</span>
-          <span>Timeline: <strong>{problem.timeline}</strong></span>
+          <span>Timeline: <strong>{opportunity.timeline}</strong></span>
           <span>·</span>
-          <span>{new Date(problem.createdAt).toLocaleDateString()}</span>
+          <span>{new Date(opportunity.createdAt).toLocaleDateString()}</span>
         </div>
       </div>
 
@@ -259,16 +259,16 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
           {/* Description */}
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="text-base">Problem Description</CardTitle>
+              <CardTitle className="text-base">Opportunity Description</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {problem.description}
+                {opportunity.description}
               </p>
             </CardContent>
           </Card>
 
-          {/* Email reveal — accepted proposal */}
+          {/* Email reveal — accepted application */}
           {acceptedProposal && (isOwner || myProposal?.status === "ACCEPTED") && (
             <Card className="border-green-200 bg-green-50">
               <CardHeader>
@@ -279,21 +279,21 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1">
                     <span className="text-sm font-medium text-green-800 min-w-[140px]">Provider&apos;s Email:</span>
                     <a
-                      href={`mailto:${acceptedProposal.provider.email}`}
+                      href={`mailto:${acceptedProposal.applicant.email}`}
                       className="text-sm text-green-700 hover:underline font-mono"
                     >
-                      {acceptedProposal.provider.email}
+                      {acceptedProposal.applicant.email}
                     </a>
                   </div>
                 )}
-                {myProposal?.status === "ACCEPTED" && problem.business.email && (
+                {myProposal?.status === "ACCEPTED" && opportunity.poster.email && (
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1">
                     <span className="text-sm font-medium text-green-800 min-w-[140px]">Business Email:</span>
                     <a
-                      href={`mailto:${problem.business.email}`}
+                      href={`mailto:${opportunity.poster.email}`}
                       className="text-sm text-green-700 hover:underline font-mono"
                     >
-                      {problem.business.email}
+                      {opportunity.poster.email}
                     </a>
                   </div>
                 )}
@@ -301,56 +301,56 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
             </Card>
           )}
 
-          {/* Proposals list */}
+          {/* Applications list */}
           {session && (isOwner || myProposal) && (
             <div>
               <h2 className="text-lg font-semibold text-foreground mb-3">
-                {isOwner ? `Proposals (${visibleProposals.length})` : "Your Proposal"}
+                {isOwner ? `Applications (${visibleProposals.length})` : "Your Application"}
               </h2>
               {visibleProposals.length === 0 ? (
                 <div className="text-center py-10 rounded-2xl border border-dashed border-border text-muted-foreground">
-                  No proposals yet. Be the first to submit one!
+                  No applications yet. Be the first to submit one!
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {visibleProposals.map((proposal) => (
+                  {visibleProposals.map((application) => (
                     <Card
-                      key={proposal.id}
-                      className={`border-border/50 ${proposal.status === "ACCEPTED" ? "ring-2 ring-green-400/30" : ""}`}
+                      key={application.id}
+                      className={`border-border/50 ${application.status === "ACCEPTED" ? "ring-2 ring-green-400/30" : ""}`}
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div>
-                            <p className="font-semibold text-foreground">{proposal.provider.name}</p>
-                            {proposal.provider.bio && (
+                            <p className="font-semibold text-foreground">{application.applicant.name}</p>
+                            {application.applicant.bio && (
                               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                                {proposal.provider.bio}
+                                {application.applicant.bio}
                               </p>
                             )}
                           </div>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${proposalStatusColor[proposal.status]}`}>
-                            {proposal.status.charAt(0) + proposal.status.slice(1).toLowerCase()}
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${proposalStatusColor[application.status]}`}>
+                            {application.status.charAt(0) + application.status.slice(1).toLowerCase()}
                           </span>
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        <p className="text-sm text-muted-foreground leading-relaxed">{proposal.message}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{application.message}</p>
                         <div className="flex gap-4 text-sm">
-                          <span><strong>Price:</strong> {proposal.price}</span>
-                          <span><strong>Timeline:</strong> {proposal.timeline}</span>
+                          <span><strong>Price:</strong> {application.price}</span>
+                          <span><strong>Timeline:</strong> {application.timeline}</span>
                         </div>
-                        {isOwner && proposal.status === "PENDING" && problem.status === "OPEN" && (
+                        {isOwner && application.status === "PENDING" && opportunity.status === "OPEN" && (
                           <Button
                             size="sm"
-                            onClick={() => acceptProposal(proposal.id)}
+                            onClick={() => acceptProposal(application.id)}
                             className="mt-2"
                           >
-                            ✓ Accept This Proposal
+                            ✓ Accept This Application
                           </Button>
                         )}
-                        {proposal.status === "ACCEPTED" && proposal.provider.email && isOwner && (
+                        {application.status === "ACCEPTED" && application.applicant.email && isOwner && (
                           <div className="text-xs text-green-600 font-medium">
-                            📧 {proposal.provider.email}
+                            📧 {application.applicant.email}
                           </div>
                         )}
                       </CardContent>
@@ -362,7 +362,7 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
           )}
 
           {/* Rating display */}
-          {problem.rating && (
+          {opportunity.rating && (
             <Card className="border-yellow-200 bg-yellow-50">
               <CardHeader>
                 <CardTitle className="text-base text-yellow-700">⭐ Provider Rating</CardTitle>
@@ -370,11 +370,11 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
               <CardContent>
                 <div className="flex gap-0.5 mb-2">
                   {[1, 2, 3, 4, 5].map((s) => (
-                    <span key={s} className={s <= problem.rating!.stars ? "text-yellow-400 text-xl" : "text-muted-foreground/30 text-xl"}>★</span>
+                    <span key={s} className={s <= opportunity.rating!.stars ? "text-yellow-400 text-xl" : "text-muted-foreground/30 text-xl"}>★</span>
                   ))}
                 </div>
-                {problem.rating.comment && (
-                  <p className="text-sm text-yellow-800 italic">&ldquo;{problem.rating.comment}&rdquo;</p>
+                {opportunity.rating.comment && (
+                  <p className="text-sm text-yellow-800 italic">&ldquo;{opportunity.rating.comment}&rdquo;</p>
                 )}
               </CardContent>
             </Card>
@@ -383,19 +383,19 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
 
         {/* Sidebar */}
         <div className="space-y-4">
-          {/* Submit proposal — Provider only, problem OPEN */}
-          {isProvider && problem.status === "OPEN" && !alreadyProposed && (
+          {/* Submit application — Provider only, opportunity OPEN */}
+          {isProvider && opportunity.status === "OPEN" && !alreadyProposed && (
             <Card className="border-primary/20 bg-primary/3">
               <CardHeader>
-                <CardTitle className="text-base">Submit Your Proposal</CardTitle>
+                <CardTitle className="text-base">Submit Your Application</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={submitProposal} className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="proposal-message" className="text-xs">Your Message *</Label>
+                    <Label htmlFor="application-message" className="text-xs">Your Message *</Label>
                     <Textarea
-                      id="proposal-message"
-                      placeholder="Describe how you'd solve this problem..."
+                      id="application-message"
+                      placeholder="Describe how you'd solve this opportunity..."
                       value={proposalForm.message}
                       onChange={(e) => setProposalForm({ ...proposalForm, message: e.target.value })}
                       rows={4}
@@ -403,9 +403,9 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="proposal-price" className="text-xs">Proposed Price *</Label>
+                    <Label htmlFor="application-price" className="text-xs">Proposed Price *</Label>
                     <Input
-                      id="proposal-price"
+                      id="application-price"
                       placeholder="e.g. $3,500"
                       value={proposalForm.price}
                       onChange={(e) => setProposalForm({ ...proposalForm, price: e.target.value })}
@@ -413,9 +413,9 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="proposal-timeline" className="text-xs">Proposed Timeline *</Label>
+                    <Label htmlFor="application-timeline" className="text-xs">Proposed Timeline *</Label>
                     <Input
-                      id="proposal-timeline"
+                      id="application-timeline"
                       placeholder="e.g. 3 weeks"
                       value={proposalForm.timeline}
                       onChange={(e) => setProposalForm({ ...proposalForm, timeline: e.target.value })}
@@ -423,7 +423,7 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={submittingProposal}>
-                    {submittingProposal ? "Submitting..." : "Submit Proposal"}
+                    {submittingProposal ? "Submitting..." : "Submit Application"}
                   </Button>
                 </form>
               </CardContent>
@@ -434,8 +434,8 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
             <Card className="bg-green-50 border-green-200">
               <CardContent className="pt-4 text-center">
                 <div className="text-2xl mb-2">✅</div>
-                <p className="text-sm font-medium text-green-700">Proposal submitted!</p>
-                <p className="text-xs text-green-600 mt-1">The business will review and respond.</p>
+                <p className="text-sm font-medium text-green-700">Application submitted!</p>
+                <p className="text-xs text-green-600 mt-1">The poster will review and respond.</p>
               </CardContent>
             </Card>
           )}
@@ -443,7 +443,7 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
           {!session && (
             <Card className="border-primary/20 bg-primary/5">
               <CardContent className="pt-4 text-center space-y-3">
-                <p className="text-sm text-muted-foreground">Sign in to submit a proposal</p>
+                <p className="text-sm text-muted-foreground">Sign in to submit a application</p>
                 <Link href="/login"><Button className="w-full" size="sm">Log in</Button></Link>
                 <Link href="/signup"><Button variant="outline" className="w-full" size="sm">Sign up free</Button></Link>
               </CardContent>
@@ -456,13 +456,13 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
               <CardHeader><CardTitle className="text-base">Your Controls</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 <div className="text-xs text-muted-foreground space-y-1">
-                  <p>Status: <strong>{problem.status.charAt(0) + problem.status.slice(1).toLowerCase()}</strong></p>
-                  <p>Proposals: <strong>{problem.proposals.length}</strong></p>
+                  <p>Status: <strong>{opportunity.status.charAt(0) + opportunity.status.slice(1).toLowerCase()}</strong></p>
+                  <p>Applications: <strong>{opportunity.applications.length}</strong></p>
                 </div>
                 <Separator />
-                {problem.status === "CLOSED" && !problem.rating && (
+                {opportunity.status === "CLOSED" && !opportunity.rating && (
                   <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">Mark this problem as completed to leave a rating.</p>
+                    <p className="text-xs text-muted-foreground">Mark this opportunity as completed to leave a rating.</p>
                     <Button
                       size="sm"
                       variant="outline"
@@ -474,7 +474,7 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
                     </Button>
                   </div>
                 )}
-                {problem.status === "COMPLETED" && !problem.rating && (
+                {opportunity.status === "COMPLETED" && !opportunity.rating && (
                   <form onSubmit={submitRating} className="space-y-3">
                     <div>
                       <Label className="text-xs mb-2 block">Rate the Solution Provider</Label>
@@ -495,7 +495,7 @@ export default function ProblemDetailPage({ params }: { params: Promise<{ id: st
                     </Button>
                   </form>
                 )}
-                {problem.rating && (
+                {opportunity.rating && (
                   <p className="text-xs text-green-600 font-medium">✅ Rating submitted</p>
                 )}
               </CardContent>

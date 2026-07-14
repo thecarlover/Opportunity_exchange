@@ -19,32 +19,32 @@ export async function POST(
   }
 
   try {
-    const problem = await prisma.problem.findUnique({
+    const opportunity = await prisma.opportunity.findUnique({
       where: { id },
       include: {
-        proposals: { where: { status: "ACCEPTED" } },
+        applications: { where: { status: "ACCEPTED" } },
       },
     });
 
-    if (!problem) {
-      return Response.json({ error: "Problem not found" }, { status: 404 });
+    if (!opportunity) {
+      return Response.json({ error: "Opportunity not found" }, { status: 404 });
     }
-    if (problem.businessId !== session.user.id) {
+    if (opportunity.posterId !== session.user.id) {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
-    if (problem.status !== "COMPLETED") {
+    if (opportunity.status !== "COMPLETED") {
       return Response.json(
-        { error: "Problem must be marked completed before rating" },
+        { error: "Opportunity must be marked completed before rating" },
         { status: 400 }
       );
     }
 
-    const acceptedProposal = problem.proposals[0];
+    const acceptedProposal = opportunity.applications[0];
     if (!acceptedProposal) {
-      return Response.json({ error: "No accepted proposal found" }, { status: 400 });
+      return Response.json({ error: "No accepted application found" }, { status: 400 });
     }
 
-    const existingRating = await prisma.rating.findUnique({ where: { problemId: id } });
+    const existingRating = await prisma.rating.findUnique({ where: { opportunityId: id } });
     if (existingRating) {
       return Response.json({ error: "Already rated" }, { status: 409 });
     }
@@ -57,8 +57,8 @@ export async function POST(
 
     const rating = await prisma.rating.create({
       data: {
-        problemId: id,
-        providerId: acceptedProposal.providerId,
+        opportunityId: id,
+        userId: acceptedProposal.applicantId,
         stars: parsed.data.stars,
         comment: parsed.data.comment ?? "",
       },

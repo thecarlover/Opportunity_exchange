@@ -16,17 +16,17 @@ export default async function AdminDashboardPage() {
     recentProblems
   ] = await Promise.all([
     prisma.user.count(),
-    prisma.problem.count(),
-    prisma.proposal.count(),
+    prisma.opportunity.count(),
+    prisma.application.count(),
     prisma.user.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
     }),
-    prisma.problem.findMany({
+    prisma.opportunity.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
-      include: { business: { select: { name: true } } },
+      include: { poster: { select: { name: true } } },
     })
   ]);
 
@@ -51,7 +51,7 @@ export default async function AdminDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Problems</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Opportunities</CardTitle>
             <div className="text-muted-foreground">💼</div>
           </CardHeader>
           <CardContent>
@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Proposals</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
             <div className="text-muted-foreground">💡</div>
           </CardHeader>
           <CardContent>
@@ -72,32 +72,32 @@ export default async function AdminDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Recent Problems</CardTitle>
+            <CardTitle>Recent Opportunities</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentProblems.map((problem) => (
-                <div key={problem.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+              {recentProblems.map((opportunity) => (
+                <div key={opportunity.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
                   <div className="space-y-1">
                     <p className="text-sm font-medium leading-none line-clamp-1">
-                      {problem.title}
+                      {opportunity.title}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      by {problem.business.name}
+                      by {opportunity.poster.name}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
-                    <Badge variant={problem.status === "OPEN" ? "default" : "secondary"}>
-                      {problem.status}
+                    <Badge variant={opportunity.status === "OPEN" ? "default" : "secondary"}>
+                      {opportunity.status}
                     </Badge>
-                    <Link href={`/problems/${problem.id}`}>
+                    <Link href={`/opportunities/${opportunity.id}`}>
                       <Button variant="ghost" size="sm">View</Button>
                     </Link>
                   </div>
                 </div>
               ))}
               {recentProblems.length === 0 && (
-                <p className="text-sm text-muted-foreground">No problems posted yet.</p>
+                <p className="text-sm text-muted-foreground">No opportunities posted yet.</p>
               )}
             </div>
           </CardContent>

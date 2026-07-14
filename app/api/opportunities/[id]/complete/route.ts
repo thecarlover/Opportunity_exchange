@@ -13,21 +13,21 @@ export async function PATCH(
   }
 
   try {
-    const problem = await prisma.problem.findUnique({ where: { id } });
-    if (!problem) {
-      return Response.json({ error: "Problem not found" }, { status: 404 });
+    const opportunity = await prisma.opportunity.findUnique({ where: { id } });
+    if (!opportunity) {
+      return Response.json({ error: "Opportunity not found" }, { status: 404 });
     }
-    if (problem.businessId !== session.user.id) {
+    if (opportunity.posterId !== session.user.id) {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
-    if (problem.status !== "CLOSED") {
+    if (opportunity.status !== "CLOSED") {
       return Response.json(
-        { error: "Problem must be closed (have an accepted proposal) to mark complete" },
+        { error: "Opportunity must be closed (have an accepted application) to mark complete" },
         { status: 400 }
       );
     }
 
-    const updated = await prisma.problem.update({
+    const updated = await prisma.opportunity.update({
       where: { id },
       data: { status: "COMPLETED" },
     });

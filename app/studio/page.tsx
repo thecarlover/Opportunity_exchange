@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-type Problem = {
+type Opportunity = {
   id: string;
   title: string;
   category: string;
@@ -15,27 +15,27 @@ type Problem = {
   timeline: string;
   status: string;
   createdAt: string;
-  _count: { proposals: number };
-  proposals: {
+  _count: { applications: number };
+  applications: {
     status: string;
-    provider: { name: string; email: string };
+    applicant: { name: string; email: string };
   }[];
   rating: { stars: number } | null;
 };
 
-type Proposal = {
+type Application = {
   id: string;
   message: string;
   price: string;
   timeline: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   createdAt: string;
-  problem: {
+  opportunity: {
     id: string;
     title: string;
     category: string;
     budget: string;
-    business: { name: string };
+    poster: { name: string };
   };
 };
 
@@ -51,15 +51,15 @@ function statusBadge(status: string) {
   return map[status] ?? "";
 }
 
-function BusinessDashboard({ problems }: { problems: Problem[] }) {
-  if (problems.length === 0) {
+function BusinessDashboard({ opportunities }: { opportunities: Opportunity[] }) {
+  if (opportunities.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-border">
         <div className="text-4xl mb-4">📭</div>
-        <h3 className="text-lg font-semibold text-foreground">No problems posted yet</h3>
-        <p className="text-muted-foreground mt-1 mb-6">Start by posting your first business problem.</p>
-        <Link href="/problems/new">
-          <Button>Post a Problem →</Button>
+        <h3 className="text-lg font-semibold text-foreground">No opportunities posted yet</h3>
+        <p className="text-muted-foreground mt-1 mb-6">Start by posting your first poster opportunity.</p>
+        <Link href="/opportunities/new">
+          <Button>Post a Opportunity →</Button>
         </Link>
       </div>
     );
@@ -67,8 +67,8 @@ function BusinessDashboard({ problems }: { problems: Problem[] }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {problems.map((p) => {
-        const acceptedProposal = p.proposals.find((pr) => pr.status === "ACCEPTED");
+      {opportunities.map((p) => {
+        const acceptedProposal = p.applications.find((pr) => pr.status === "ACCEPTED");
         return (
           <Card key={p.id} className="hover:border-primary/40 hover:shadow-md transition-all duration-200">
             <CardHeader className="pb-3">
@@ -88,11 +88,11 @@ function BusinessDashboard({ problems }: { problems: Problem[] }) {
                 <span>⏱ {p.timeline}</span>
               </div>
               <div className="text-xs text-muted-foreground">
-                📄 {p._count.proposals} proposal{p._count.proposals !== 1 ? "s" : ""}
+                📄 {p._count.applications} application{p._count.applications !== 1 ? "s" : ""}
               </div>
               {acceptedProposal && (
                 <div className="text-xs text-green-600 font-medium">
-                  ✓ Accepted: {acceptedProposal.provider.name}
+                  ✓ Accepted: {acceptedProposal.applicant.name}
                 </div>
               )}
               {p.rating && (
@@ -102,7 +102,7 @@ function BusinessDashboard({ problems }: { problems: Problem[] }) {
               )}
             </CardContent>
             <CardFooter className="pt-0">
-              <Link href={`/problems/${p.id}`} className="w-full">
+              <Link href={`/opportunities/${p.id}`} className="w-full">
                 <Button variant="outline" size="sm" className="w-full">
                   View Details →
                 </Button>
@@ -115,15 +115,15 @@ function BusinessDashboard({ problems }: { problems: Problem[] }) {
   );
 }
 
-function ProviderDashboard({ proposals }: { proposals: Proposal[] }) {
-  if (proposals.length === 0) {
+function ProviderDashboard({ applications }: { applications: Application[] }) {
+  if (applications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-border">
         <div className="text-4xl mb-4">💡</div>
-        <h3 className="text-lg font-semibold text-foreground">No proposals yet</h3>
-        <p className="text-muted-foreground mt-1 mb-6">Browse open problems and submit your first proposal.</p>
-        <Link href="/problems">
-          <Button>Browse Problems →</Button>
+        <h3 className="text-lg font-semibold text-foreground">No applications yet</h3>
+        <p className="text-muted-foreground mt-1 mb-6">Browse open opportunities and submit your first application.</p>
+        <Link href="/opportunities">
+          <Button>Browse Opportunities →</Button>
         </Link>
       </div>
     );
@@ -131,22 +131,22 @@ function ProviderDashboard({ proposals }: { proposals: Proposal[] }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {proposals.map((p) => (
+      {applications.map((p) => (
         <Card key={p.id} className="hover:border-primary/40 hover:shadow-md transition-all duration-200">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2 mb-1">
               <Badge variant="outline" className="text-xs text-primary border-primary/30 bg-primary/5">
-                {p.problem.category}
+                {p.opportunity.category}
               </Badge>
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusBadge(p.status)}`}>
                 {p.status.charAt(0) + p.status.slice(1).toLowerCase()}
               </span>
             </div>
-            <CardTitle className="text-sm leading-snug line-clamp-2">{p.problem.title}</CardTitle>
+            <CardTitle className="text-sm leading-snug line-clamp-2">{p.opportunity.title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 pb-3">
             <div className="text-xs text-muted-foreground">
-              by {p.problem.business.name}
+              by {p.opportunity.poster.name}
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>💰 My price: {p.price}</span>
@@ -155,9 +155,9 @@ function ProviderDashboard({ proposals }: { proposals: Proposal[] }) {
             <p className="text-xs text-muted-foreground line-clamp-2 italic">&ldquo;{p.message}&rdquo;</p>
           </CardContent>
           <CardFooter className="pt-0">
-            <Link href={`/problems/${p.problem.id}`} className="w-full">
+            <Link href={`/opportunities/${p.opportunity.id}`} className="w-full">
               <Button variant="outline" size="sm" className="w-full">
-                View Problem →
+                View Opportunity →
               </Button>
             </Link>
           </CardFooter>
@@ -171,8 +171,8 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
   const [data, setData] = useState<{
     role: string;
-    problems?: Problem[];
-    proposals?: Proposal[];
+    opportunities?: Opportunity[];
+    applications?: Application[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -233,15 +233,15 @@ export default function DashboardPage() {
           </h1>
           <p className="text-muted-foreground mt-1">
             Welcome back, <strong>{session.user.name}</strong>!
-            Manage your posted problems and track your submitted proposals.
+            Manage your posted opportunities and track your submitted applications.
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/problems">
-            <Button variant="outline">Browse Problems</Button>
+          <Link href="/opportunities">
+            <Button variant="outline">Browse Opportunities</Button>
           </Link>
-          <Link href="/problems/new">
-            <Button className="shadow-sm">+ Post a Problem</Button>
+          <Link href="/opportunities/new">
+            <Button className="shadow-sm">+ Post a Opportunity</Button>
           </Link>
         </div>
       </div>
@@ -249,18 +249,18 @@ export default function DashboardPage() {
       {/* Stats row */}
       {data && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-          {data.problems && [
-            { label: "Total Problems", value: data.problems.length },
-            { label: "Open", value: data.problems.filter((p) => p.status === "OPEN").length },
+          {data.opportunities && [
+            { label: "Total Opportunities", value: data.opportunities.length },
+            { label: "Open", value: data.opportunities.filter((p) => p.status === "OPEN").length },
           ].map((stat) => (
             <div key={stat.label} className="rounded-xl border border-border bg-card p-4 text-center">
               <div className="text-2xl font-bold text-primary">{stat.value}</div>
               <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
             </div>
           ))}
-          {data.proposals && [
-            { label: "Total Proposals", value: data.proposals.length },
-            { label: "Accepted", value: data.proposals.filter((p) => p.status === "ACCEPTED").length },
+          {data.applications && [
+            { label: "Total Applications", value: data.applications.length },
+            { label: "Accepted", value: data.applications.filter((p) => p.status === "ACCEPTED").length },
           ].map((stat) => (
             <div key={stat.label} className="rounded-xl border border-border bg-card p-4 text-center">
               <div className="text-2xl font-bold text-primary">{stat.value}</div>
@@ -270,31 +270,31 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {data?.problems && data.problems.length > 0 && (
+      {data?.opportunities && data.opportunities.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-xl font-bold mb-4">Problems I Posted</h2>
-          <BusinessDashboard problems={data.problems} />
+          <h2 className="text-xl font-bold mb-4">Opportunities I Posted</h2>
+          <BusinessDashboard opportunities={data.opportunities} />
         </div>
       )}
       
-      {data?.proposals && data.proposals.length > 0 && (
+      {data?.applications && data.applications.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-xl font-bold mb-4">My Submitted Proposals</h2>
-          <ProviderDashboard proposals={data.proposals} />
+          <h2 className="text-xl font-bold mb-4">My Submitted Applications</h2>
+          <ProviderDashboard applications={data.applications} />
         </div>
       )}
       
-      {data?.problems?.length === 0 && data?.proposals?.length === 0 && (
+      {data?.opportunities?.length === 0 && data?.applications?.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-border bg-card">
           <div className="text-4xl mb-4">👋</div>
           <h3 className="text-lg font-semibold text-foreground">Welcome to Solvd.io!</h3>
-          <p className="text-muted-foreground mt-1 mb-6 max-w-md mx-auto">You haven't posted any problems or submitted any proposals yet. Choose what you'd like to do first.</p>
+          <p className="text-muted-foreground mt-1 mb-6 max-w-md mx-auto">You haven't posted any opportunities or submitted any applications yet. Choose what you'd like to do first.</p>
           <div className="flex gap-4">
-            <Link href="/problems/new">
-              <Button>Post a Problem</Button>
+            <Link href="/opportunities/new">
+              <Button>Post a Opportunity</Button>
             </Link>
-            <Link href="/problems">
-              <Button variant="outline">Browse Problems</Button>
+            <Link href="/opportunities">
+              <Button variant="outline">Browse Opportunities</Button>
             </Link>
           </div>
         </div>

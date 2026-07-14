@@ -1,4 +1,4 @@
-// Solvd.io — Prisma Schema
+// Solvd.io -> Opportunity OS — Prisma Schema
 
 generator client {
   provider = "prisma-client"
@@ -14,70 +14,73 @@ enum Role {
   ADMIN
 }
 
-enum ProblemStatus {
+enum OpportunityStatus {
   OPEN
   CLOSED
   COMPLETED
 }
 
-enum ProposalStatus {
+enum ApplicationStatus {
   PENDING
   ACCEPTED
   REJECTED
 }
 
 model User {
-  id           String    @id @default(cuid())
-  name         String
-  email        String    @unique
-  passwordHash String
-  role         Role
-  bio          String?
-  createdAt    DateTime  @default(now())
+  id               String    @id @default(cuid())
+  name             String
+  email            String    @unique
+  passwordHash     String
+  role             Role      @default(USER)
+  bio              String?
+  skills           String[]
+  reputationScores Json?
+  createdAt        DateTime  @default(now())
 
-  problems  Problem[]
-  proposals Proposal[]
-  ratings   Rating[]
+  opportunities Opportunity[] @relation("PostedOpportunities")
+  applications  Application[] @relation("SubmittedApplications")
+  ratings       Rating[]      @relation("ReceivedRatings")
 }
 
-model Problem {
-  id          String        @id @default(cuid())
-  businessId  String
+model Opportunity {
+  id          String            @id @default(cuid())
+  posterId    String
   title       String
   description String
   category    String
   budget      String
   timeline    String
-  status      ProblemStatus @default(OPEN)
-  createdAt   DateTime      @default(now())
+  tags        String[]
+  status      OpportunityStatus @default(OPEN)
+  createdAt   DateTime          @default(now())
 
-  business  User       @relation(fields: [businessId], references: [id])
-  proposals Proposal[]
-  rating    Rating?
+  poster       User          @relation("PostedOpportunities", fields: [posterId], references: [id])
+  applications Application[]
+  rating       Rating?
 }
 
-model Proposal {
-  id         String         @id @default(cuid())
-  problemId  String
-  providerId String
-  message    String
-  price      String
-  timeline   String
-  status     ProposalStatus @default(PENDING)
-  createdAt  DateTime       @default(now())
+model Application {
+  id            String            @id @default(cuid())
+  opportunityId String
+  applicantId   String
+  message       String
+  price         String
+  timeline      String
+  status        ApplicationStatus @default(PENDING)
+  createdAt     DateTime          @default(now())
 
-  problem  Problem @relation(fields: [problemId], references: [id])
-  provider User    @relation(fields: [providerId], references: [id])
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id])
+  applicant   User        @relation("SubmittedApplications", fields: [applicantId], references: [id])
 }
 
 model Rating {
-  id         String   @id @default(cuid())
-  problemId  String   @unique
-  providerId String
-  stars      Int
-  comment    String?
-  createdAt  DateTime @default(now())
+  id            String   @id @default(cuid())
+  opportunityId String   @unique
+  userId        String
+  stars         Int
+  comment       String?
+  createdAt     DateTime @default(now())
 
-  problem  Problem @relation(fields: [problemId], references: [id])
-  provider User    @relation(fields: [providerId], references: [id])
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id])
+  user        User        @relation("ReceivedRatings", fields: [userId], references: [id])
 }

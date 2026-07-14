@@ -5,12 +5,12 @@ import Navbar from "@/components/navbar";
 import Providers from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "Solvd.io — Connect Business Problems with Expert Solutions",
+  title: "Solvd.io — Connect Business Opportunities with Expert Solutions",
   description:
-    "A marketplace where businesses post problems and solution providers submit tailored proposals. Find your match today.",
+    "A marketplace where businesses post opportunities and solution providers submit tailored applications. Find your match today.",
   openGraph: {
     title: "Solvd.io",
-    description: "Connect Business Problems with Expert Solutions",
+    description: "Connect Business Opportunities with Expert Solutions",
     url: "https://solvd.io",
     siteName: "Solvd.io",
     images: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Solvd.io",
-    description: "Connect Business Problems with Expert Solutions",
+    description: "Connect Business Opportunities with Expert Solutions",
     images: ["https://solvd.io/og.jpg"],
   },
 };

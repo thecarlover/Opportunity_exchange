@@ -20,25 +20,25 @@ export async function GET(
   }
 
   try {
-    const problem = await prisma.problem.findUnique({ where: { id } });
-    if (!problem) {
-      return Response.json({ error: "Problem not found" }, { status: 404 });
+    const opportunity = await prisma.opportunity.findUnique({ where: { id } });
+    if (!opportunity) {
+      return Response.json({ error: "Opportunity not found" }, { status: 404 });
     }
 
     const where =
-      session.user.id === problem.businessId
-        ? { problemId: id }
-        : { problemId: id, providerId: session.user.id };
+      session.user.id === opportunity.posterId
+        ? { opportunityId: id }
+        : { opportunityId: id, applicantId: session.user.id };
 
-    const proposals = await prisma.proposal.findMany({
+    const applications = await prisma.application.findMany({
       where,
       include: {
-        provider: { select: { id: true, name: true, bio: true, email: true } },
+        applicant: { select: { id: true, name: true, bio: true, email: true } },
       },
       orderBy: { createdAt: "desc" },
     });
 
-    return Response.json(proposals);
+    return Response.json(applications);
   } catch (err) {
     console.error(err);
     return Response.json({ error: "Internal server error" }, { status: 500 });
@@ -55,20 +55,20 @@ export async function POST(
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const problem = await prisma.problem.findUnique({ where: { id } });
-    if (!problem || problem.status !== "OPEN") {
-      return Response.json({ error: "Problem not open" }, { status: 400 });
+    const opportunity = await prisma.opportunity.findUnique({ where: { id } });
+    if (!opportunity || opportunity.status !== "OPEN") {
+      return Response.json({ error: "Opportunity not open" }, { status: 400 });
     }
-    if (problem.businessId === session.user.id) {
-      return Response.json({ error: "You cannot submit a proposal for your own problem" }, { status: 400 });
+    if (opportunity.posterId === session.user.id) {
+      return Response.json({ error: "You cannot submit a application for your own opportunity" }, { status: 400 });
     }
 
-    const existing = await prisma.proposal.findFirst({
-      where: { problemId: id, providerId: session.user.id },
+    const existing = await prisma.application.findFirst({
+      where: { opportunityId: id, applicantId: session.user.id },
     });
     if (existing) {
       return Response.json(
-        { error: "You already submitted a proposal for this problem" },
+        { error: "You already submitted a application for this opportunity" },
         { status: 409 }
       );
     }
@@ -79,15 +79,15 @@ export async function POST(
       return Response.json({ error: "Invalid input" }, { status: 400 });
     }
 
-    const proposal = await prisma.proposal.create({
+    const application = await prisma.application.create({
       data: {
         ...parsed.data,
-        problemId: id,
-        providerId: session.user.id,
+        opportunityId: id,
+        applicantId: session.user.id,
       },
     });
 
-    return Response.json(proposal, { status: 201 });
+    return Response.json(application, { status: 201 });
   } catch (err) {
     console.error(err);
     return Response.json({ error: "Internal server error" }, { status: 500 });

@@ -13,15 +13,15 @@ const createProblemSchema = z.object({
 
 export async function GET() {
   try {
-    const problems = await prisma.problem.findMany({
+    const opportunities = await prisma.opportunity.findMany({
       where: { status: "OPEN" },
       include: {
-        business: { select: { name: true, id: true } },
-        _count: { select: { proposals: true } },
+        poster: { select: { name: true, id: true } },
+        _count: { select: { applications: true } },
       },
       orderBy: { createdAt: "desc" },
     });
-    return Response.json(problems);
+    return Response.json(opportunities);
   } catch (err) {
     console.error(err);
     return Response.json({ error: "Internal server error" }, { status: 500 });
@@ -41,14 +41,14 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "Invalid input" }, { status: 400 });
     }
 
-    const problem = await prisma.problem.create({
+    const opportunity = await prisma.opportunity.create({
       data: {
         ...parsed.data,
-        businessId: session.user.id,
+        posterId: session.user.id,
       },
     });
 
-    return Response.json(problem, { status: 201 });
+    return Response.json(opportunity, { status: 201 });
   } catch (err) {
     console.error(err);
     return Response.json({ error: "Internal server error" }, { status: 500 });

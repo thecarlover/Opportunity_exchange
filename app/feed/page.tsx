@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-type Problem = {
+type Opportunity = {
   id: string;
   title: string;
   description: string;
@@ -16,8 +16,8 @@ type Problem = {
   timeline: string;
   status: string;
   createdAt: string;
-  business: { name: string };
-  _count: { proposals: number };
+  poster: { name: string };
+  _count: { applications: number };
 };
 
 const CATEGORIES = ["All", "Technology", "Marketing", "Design", "Finance", "Operations", "Legal", "HR", "Other"];
@@ -32,13 +32,13 @@ function statusBadge(status: string) {
 }
 
 export default function ProblemsPage() {
-  const [problems, setProblems] = useState<Problem[]>([]);
+  const [opportunities, setProblems] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
   useEffect(() => {
-    fetch("/api/problems")
+    fetch("/api/opportunities")
       .then(async (r) => {
         if (!r.ok) return [];
         return r.json();
@@ -48,7 +48,7 @@ export default function ProblemsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = problems.filter((p) => {
+  const filtered = opportunities.filter((p) => {
     const matchCat = category === "All" || p.category === category;
     const matchSearch =
       search === "" ||
@@ -60,17 +60,17 @@ export default function ProblemsPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Open Problems</h1>
+        <h1 className="text-3xl font-bold text-foreground">Open Opportunities</h1>
         <p className="text-muted-foreground mt-1">
-          Browse business challenges and submit your proposal.
+          Browse poster challenges and submit your application.
         </p>
       </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <Input
-          id="problems-search"
-          placeholder="Search problems..."
+          id="opportunities-search"
+          placeholder="Search opportunities..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="sm:max-w-xs"
@@ -101,17 +101,17 @@ export default function ProblemsPage() {
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="text-5xl mb-4">🔍</div>
-          <h3 className="text-lg font-semibold text-foreground">No problems found</h3>
+          <h3 className="text-lg font-semibold text-foreground">No opportunities found</h3>
           <p className="text-muted-foreground mt-1">
             {search || category !== "All"
               ? "Try adjusting your filters."
-              : "No open problems yet — check back soon!"}
+              : "No open opportunities yet — check back soon!"}
           </p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((p) => (
-            <Link key={p.id} href={`/problems/${p.id}`}>
+            <Link key={p.id} href={`/opportunities/${p.id}`}>
               <Card className="group h-full hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-2">
@@ -140,8 +140,8 @@ export default function ProblemsPage() {
                     <span>⏱ {p.timeline}</span>
                   </div>
                   <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
-                    <span>by {p.business.name}</span>
-                    <span>{p._count.proposals} proposal{p._count.proposals !== 1 ? "s" : ""}</span>
+                    <span>by {p.poster.name}</span>
+                    <span>{p._count.applications} application{p._count.applications !== 1 ? "s" : ""}</span>
                   </div>
                 </CardFooter>
               </Card>
@@ -151,10 +151,10 @@ export default function ProblemsPage() {
       )}
 
       <div className="mt-8 text-center text-sm text-muted-foreground">
-        Showing {filtered.length} of {problems.length} problems
+        Showing {filtered.length} of {opportunities.length} opportunities
         {" · "}
         <Link href="/signup" className="text-primary hover:underline">
-          Sign up to submit proposals
+          Sign up to submit applications
         </Link>
       </div>
     </div>

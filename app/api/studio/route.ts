@@ -8,27 +8,27 @@ export async function GET() {
   }
 
   try {
-    const [problems, proposals] = await Promise.all([
-      prisma.problem.findMany({
-        where: { businessId: session.user.id },
+    const [opportunities, applications] = await Promise.all([
+      prisma.opportunity.findMany({
+        where: { posterId: session.user.id },
         include: {
-          _count: { select: { proposals: true } },
-          proposals: {
+          _count: { select: { applications: true } },
+          applications: {
             where: { status: "ACCEPTED" },
             include: {
-              provider: { select: { name: true, email: true } },
+              applicant: { select: { name: true, email: true } },
             },
           },
           rating: true,
         },
         orderBy: { createdAt: "desc" },
       }),
-      prisma.proposal.findMany({
-        where: { providerId: session.user.id },
+      prisma.application.findMany({
+        where: { applicantId: session.user.id },
         include: {
-          problem: {
+          opportunity: {
             include: {
-              business: { select: { name: true } },
+              poster: { select: { name: true } },
             },
           },
         },
@@ -36,7 +36,7 @@ export async function GET() {
       })
     ]);
 
-    return Response.json({ role: session.user.role, problems, proposals });
+    return Response.json({ role: session.user.role, opportunities, applications });
   } catch (err) {
     console.error(err);
     return Response.json({ error: "Internal server error" }, { status: 500 });

@@ -24,14 +24,14 @@ export default function Navbar() {
 
         <nav className="flex items-center gap-1">
           <Link
-            href="/problems"
+            href="/opportunities"
             className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-              pathname === "/problems"
+              pathname === "/opportunities"
                 ? "text-primary bg-primary/10"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
             }`}
           >
-            Browse Problems
+            Browse Opportunities
           </Link>
 
           {session?.user ? (
@@ -47,9 +47,9 @@ export default function Navbar() {
                 {session.user.role === "ADMIN" ? "Admin Panel" : "Dashboard"}
               </Link>
               {session.user.role !== "ADMIN" && (
-                <Link href="/problems/new">
+                <Link href="/opportunities/new">
                   <Button size="sm" className="ml-2">
-                    Post a Problem
+                    Post a Opportunity
                   </Button>
                 </Link>
               )}

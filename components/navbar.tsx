@@ -15,36 +15,36 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-            S
+            O
           </div>
           <span className="text-lg font-bold text-foreground tracking-tight">
-            Solvd.io
+            Opportunity OS
           </span>
         </Link>
 
         <nav className="flex items-center gap-1">
           <Link
-            href="/opportunities"
+            href="/feed"
             className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-              pathname === "/opportunities"
+              pathname === "/feed"
                 ? "text-primary bg-primary/10"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
             }`}
           >
-            Browse Opportunities
+            Mission Feed
           </Link>
 
           {session?.user ? (
             <>
               <Link
-                href={session.user.role === "ADMIN" ? "/admin" : "/dashboard"}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  pathname === "/dashboard" || pathname === "/admin"
-                    ? "text-primary bg-primary/10"
+                href={session.user.role === "ADMIN" ? "/admin" : "/studio"}
+                className={`transition-colors hover:text-foreground/80 ${
+                  pathname === "/studio" || pathname === "/admin"
+                    ? "text-foreground font-semibold"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
-                {session.user.role === "ADMIN" ? "Admin Panel" : "Dashboard"}
+                {session.user.role === "ADMIN" ? "Admin Panel" : "Studio"}
               </Link>
               {session.user.role !== "ADMIN" && (
                 <Link href="/opportunities/new">

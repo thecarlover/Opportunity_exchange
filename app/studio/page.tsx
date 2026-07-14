@@ -178,7 +178,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      fetch("/api/dashboard")
+      fetch("/api/studio")
         .then(async (r) => {
           if (!r.ok) return null;
           return r.json();

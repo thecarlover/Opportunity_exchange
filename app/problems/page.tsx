@@ -39,8 +39,12 @@ export default function ProblemsPage() {
 
   useEffect(() => {
     fetch("/api/problems")
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) return [];
+        return r.json();
+      })
       .then(setProblems)
+      .catch(() => setProblems([]))
       .finally(() => setLoading(false));
   }, []);
 

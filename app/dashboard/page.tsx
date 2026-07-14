@@ -179,8 +179,12 @@ export default function DashboardPage() {
   useEffect(() => {
     if (status === "authenticated") {
       fetch("/api/dashboard")
-        .then((r) => r.json())
+        .then(async (r) => {
+          if (!r.ok) return null;
+          return r.json();
+        })
         .then(setData)
+        .catch(() => setData(null))
         .finally(() => setLoading(false));
     } else if (status === "unauthenticated") {
       setLoading(false);

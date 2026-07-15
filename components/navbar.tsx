@@ -105,11 +105,9 @@ export default function Navbar() {
              <Badge variant="default" className="mr-2">Admin</Badge>
           )}
           <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+            <SheetTrigger render={<Button variant="ghost" size="icon" className="md:hidden" />}>
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
-              </Button>
             </SheetTrigger>
             <SheetContent side="right" className="flex flex-col gap-4">
               <Link href="/" className="flex items-center gap-2 mb-4 mt-4">
